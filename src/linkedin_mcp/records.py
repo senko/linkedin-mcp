@@ -122,7 +122,7 @@ class Message(BaseModel):
         recipients: Display names of the recipients.
         recipient_profile_urls: LinkedIn profile URLs of the recipients.
         sent_at: Send time in UTC, or None if it could not be parsed.
-        subject: Message subject (usually empty, except for InMail).
+        subject: Message subject (usually empty).
         content: Message body.
         folder: Mailbox folder, for example "INBOX", "ARCHIVE" or "SPAM".
         attachments: Attachment URLs.

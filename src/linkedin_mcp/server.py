@@ -25,19 +25,19 @@ from linkedin_mcp.records import (
 from linkedin_mcp.service import DomainSummary, LinkedInService, Page
 
 INSTRUCTIONS = """\
-Read-only access to the user's own LinkedIn data through LinkedIn's EU Member Data
-Portability API. Nothing can be sent, posted or changed.
+Read-only access to the user's own LinkedIn data through LinkedIn's EU Member Data Portability API.
 
 Data sources:
-- Snapshot data (profile, messages, connections, posts and other domains): the user's
-  full history. It is cached for a while; message history may end at the time the user
-  gave consent to the app.
-- Recent activity (get_recent_activity): events after consent (new messages, posts,
-  comments, reactions), only from the last 28 days.
+- Snapshot (all tools except get_recent_activity): the user's full history. It can end at the time the user connected this app, and it is cached (one hour by default).
+- get_recent_activity: activity after the user connected the app (new messages, posts, comments, reactions), only from the last 28 days. For the latest messages or posts, check both sources.
 
-Start with list_conversations or search_messages for messages, search_connections for
-contacts, and list_data_domains to see what other data exists.
-"""
+Usage notes:
+- Search is a case- and accent-insensitive substring match, not fuzzy or semantic. Search for one name or word at a time. Filters combine with AND.
+- The user's own messages have the user's name as `sender`; get_profile returns it.
+- Connection emails are usually missing: LinkedIn exports them only if the connection allows it.
+- For other data (events, invitations, positions, skills, comments, likes), call list_data_domains once (it is slow), then get_data_domain. Domain names are case-sensitive; events are "Events".
+- The posts data can be empty for some time after the user connects the app.
+"""  # noqa: E501 (unwrapped lines save tokens)
 
 READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=False)
 
@@ -197,7 +197,11 @@ def create_server(settings: Settings) -> MCPServer[LinkedInService]:
             datetime | None, Field(description="Only events at or after this time.")
         ] = None,
         resource_name: Annotated[
-            str | None, Field(description='Only events for this resource type, e.g. "messages".')
+            str | None,
+            Field(
+                description="Only events for this resource type. The values are not "
+                "documented: call without this filter first to see which values occur."
+            ),
         ] = None,
         offset: Offset = 0,
         limit: Limit = 10,
@@ -224,7 +228,8 @@ def create_server(settings: Settings) -> MCPServer[LinkedInService]:
     async def get_data_domain(
         ctx: ServiceContext,
         domain: Annotated[
-            str, Field(description="Case-sensitive domain name from list_data_domains.")
+            str,
+            Field(description='Case-sensitive name from list_data_domains, e.g. "Events".'),
         ],
         offset: Offset = 0,
         limit: Limit = 50,

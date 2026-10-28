@@ -121,6 +121,20 @@ Generic JSON configuration (Claude Desktop and others):
 All list tools support `offset` and `limit` and return the `total` number of matches.
 Text matching ignores case and diacritics, so `saric` matches `Šarić`.
 
+### Agent guidance
+
+The server sends a short usage guide to every MCP client in its `instructions`: data
+sources, search behaviour and the main caveats.
+[`skills/linkedin-mcp/SKILL.md`](skills/linkedin-mcp/SKILL.md) is a longer guide with
+steps for messages, contacts, posts, events and changelog data. To use it in Claude Code,
+copy it to your skills directory:
+
+```sh
+cp -r skills/linkedin-mcp ~/.claude/skills/
+```
+
+For other agents, add the file's content to the agent's instructions.
+
 ## Command-line debugging
 
 The CLI can call the API directly and print JSON. No MCP host is needed:
